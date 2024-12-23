@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+    id 'application' // Aggiunto per supportare l'esecuzione come applicazione
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    // Specifica la classe principale dell'applicazione
+    mainClass = 'org.example.PongGame'
+}
+
+jar {
+    // Configura il JAR eseguibile
+    manifest {
+        attributes(
+                'Main-Class': 'org.example.PongGame' // Classe principale
+        )
+    }
+}

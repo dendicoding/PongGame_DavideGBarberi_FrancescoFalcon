@@ -12,7 +12,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     private int ballX, ballY;
     private int ballVelX, ballVelY;
     private int paddle1Y = 200, paddle2Y = 200;
-    private final int paddleWidth = 15, paddleHeight = 100;
+    private final int paddleWidth = 15, paddleHeight = 130;
     private final Timer timer;
 
     private int scorePlayer1 = 0;
@@ -230,7 +230,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
                 ballVelY *= 1.5;
                 effectMessage = "Velocità 2x! Durata: 5 secondi";
             } else if (currentPowerUp.getType().equals("Racchetta")) {
-                currentPaddleHeight = 140;
+                currentPaddleHeight = 180;
                 effectMessage = "Racchette più grandi! Durata: 5 secondi";
             }
             effectMessageDuration = 100;
@@ -239,9 +239,17 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     }
 
     private void deactivatePowerUp() {
-        setBallSpeedBasedOnDifficulty(difficulty);
-        currentPaddleHeight = paddleHeight;
+        int speed = 0;
+        switch (difficulty) {
+            case "Facile": speed = 4; break;
+            case "Media": speed = 6; break;
+            case "Difficile": speed = 8; break;
+        }
+        ballVelX = ballVelX < 0 ? -speed : speed; // Mantiene la direzione originale
+        ballVelY = ballVelY < 0 ? -speed : speed; // Mantiene la direzione originale
+        currentPaddleHeight = paddleHeight; // Reimposta l'altezza della racchetta
     }
+
 
     @Override
     public void keyPressed(KeyEvent e) {

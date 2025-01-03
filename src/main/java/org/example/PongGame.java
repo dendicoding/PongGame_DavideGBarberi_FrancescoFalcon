@@ -1,7 +1,6 @@
 package org.example;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -328,7 +327,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
                 if (isHovered) {
                     g2.setColor(hoverColor);
                 } else {
-                    g2.setColor(new Color(41, 128, 185));
+                    g2.setColor(new Color(31, 118, 175));
                 }
 
                 RoundRectangle2D.Float rect = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 15, 15);
@@ -361,10 +360,11 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
         menuPanel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
 
-        JLabel titleLabel = new JLabel("PONG - A.I.&D.A 24-25");
+        JLabel titleLabel = new JLabel("PONG");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 48));
         titleLabel.setForeground(Color.WHITE);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        //titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Crea i JTextField per i nomi dei giocatori
         JTextField player1NameField = new JTextField("Davide Barberi");
@@ -377,13 +377,27 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
 
         StyledButton exitButton = new StyledButton("Esci");
 
+        
+
+        JLabel player1Label = new JLabel("Giocatore 1:");
+        player1Label.setFont(new Font("Arial", Font.ITALIC, 20));
+        player1Label.setForeground(new Color(230, 230, 250)); // Colore Lavanda
+
+        JLabel player2Label = new JLabel("Giocatore 2:");
+        player2Label.setFont(new Font("Arial", Font.ITALIC, 20));
+        player2Label.setForeground(new Color(230, 230, 250)); // Colore Lavanda
+
         menuPanel.add(titleLabel);
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        menuPanel.add(new JLabel("Giocatore 1:"));
+        menuPanel.add(Box.createRigidArea(new Dimension(0, 40)));
+
+        menuPanel.add(player1Label);
         menuPanel.add(player1NameField);
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        menuPanel.add(new JLabel("Giocatore 2:"));
+        menuPanel.add(Box.createRigidArea(new Dimension(0, 40)));
+
+        menuPanel.add(player2Label);
         menuPanel.add(player2NameField);
+        menuPanel.add(Box.createRigidArea(new Dimension(0, 30)));
+
         menuPanel.add(Box.createRigidArea(new Dimension(0, 50)));
         menuPanel.add(playButton);
         menuPanel.add(Box.createRigidArea(new Dimension(0, 20)));
@@ -391,9 +405,9 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         menuPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         menuPanel.add(exitButton);
 
-        playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         playButton.addActionListener(e -> {
             // Ottieni i nomi dei giocatori dai campi di testo
@@ -475,5 +489,3 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         }
     }
 }
-
-//test

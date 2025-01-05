@@ -180,10 +180,6 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         if (ballY <= 0 || ballY >= getHeight() - 15) ballVelY = -ballVelY;
 
 
-        //sistemare la fisica della racchetta
-        //
-        //
-// Dentro il metodo o il ciclo di gioco:
         if ((ballX <= 35 && ballY + 10 >= paddle1Y - 5 && ballY <= paddle1Y + currentPaddleHeight + 5) ||
         (ballX >= getWidth() - 50 && ballY + 10 >= paddle2Y - 5 && ballY <= paddle2Y + currentPaddleHeight + 5)) {
 
@@ -195,7 +191,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
                     ballVelX = -ballVelX; // Inverti la velocità
                     ballTrail.add(new Point(ballX + 7, ballY + 7)); // Aggiungi al trail
                 
-                // Rimuovi vecchi punti dal trail
+                // Rimuovi vecchi punti dalla coda
                 if (ballTrail.size() > 50) ballTrail.remove(0);
                 
                 // Aggiorna il tempo dell'ultima collisione

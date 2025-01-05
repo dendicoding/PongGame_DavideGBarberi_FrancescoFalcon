@@ -38,9 +38,9 @@ import javax.swing.Timer;
 import javax.swing.UIManager;
 
 public class PongGame extends JPanel implements ActionListener, KeyListener {
-    private int ballX, ballY;
-    private int ballVelX, ballVelY;
-    private int paddle1Y = 200, paddle2Y = 200;
+    public int ballX = getWidth()/2, ballY = getHeight()/2;
+    public int ballVelX, ballVelY;
+    public int paddle1Y = 200, paddle2Y = 200;
     private final int paddleWidth = 15, paddleHeight = 130;
     private final Timer timer;
 
@@ -48,13 +48,13 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     private long lastCollisionTime = 0;
 
 
-    private int scorePlayer1 = 0;
-    private int scorePlayer2 = 0;
+    public int scorePlayer1 = 0;
+    public int scorePlayer2 = 0;
     private String difficulty;
-    private PowerUp currentPowerUp = null;
+    public PowerUp currentPowerUp = null;
     private int powerUpDuration = 0;
-    private int currentPaddleHeight = paddleHeight;
-    private String effectMessage = "";
+    public int currentPaddleHeight = paddleHeight;
+    public String effectMessage = "";
     private int effectMessageDuration = 0;
     private List<Point> ballTrail = new ArrayList<>();
     private Image backgroundImage;
@@ -71,7 +71,6 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         this.player2Name = player2Name;
         this.setFocusable(true);
         this.addKeyListener(this);
-
         resetBall(); // Inizializza la posizione e velocità della pallina
         setBallSpeedBasedOnDifficulty(difficulty); // Imposta la velocità in base alla difficoltà
 
@@ -80,7 +79,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         timer.start();
     }
 
-    private void setBallSpeedBasedOnDifficulty(String difficulty) {
+    public void setBallSpeedBasedOnDifficulty(String difficulty) {
         switch (difficulty) {
             case "Facile": ballVelX = 4; ballVelY = 4; break;
             case "Media": ballVelX = 6; ballVelY = 6; break;
@@ -97,7 +96,6 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         for (Point p : ballTrail) {
             g.fillOval(p.x, p.y, 5, 5);
         }
-
         g.setColor(Color.WHITE);
         g.fillOval(ballX, ballY, 30, 30);
 
@@ -265,7 +263,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     }
 
 
-    private void generatePowerUp() {
+    public void generatePowerUp() {
         Random rand = new Random();
         int x = rand.nextInt(getWidth() - 60) + 40;
         int y = rand.nextInt(getHeight() - 60) + 40;
@@ -273,7 +271,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         currentPowerUp = new PowerUp(x, y, type);
     }
 
-    private void activatePowerUp() {
+    public void activatePowerUp() {
         if (currentPowerUp != null) {
             if (currentPowerUp.getType().equals("Velocità")) {
                 ballVelX *= 1.5;

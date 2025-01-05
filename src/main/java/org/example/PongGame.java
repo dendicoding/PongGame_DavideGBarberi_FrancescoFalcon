@@ -44,6 +44,10 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     private final int paddleWidth = 15, paddleHeight = 130;
     private final Timer timer;
 
+
+    private long lastCollisionTime = 0;
+
+
     private int scorePlayer1 = 0;
     private int scorePlayer2 = 0;
     private String difficulty;
@@ -164,26 +168,47 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
+        //scia
         ballTrail.add(new Point(ballX + 7, ballY + 7));
         if (ballTrail.size() > 50) ballTrail.remove(0);
 
         ballX += ballVelX;
         ballY += ballVelY;
 
+        //bordi orizzontali
         if (ballY <= 0 || ballY >= getHeight() - 15) ballVelY = -ballVelY;
 
-        if (ballX <= 30 && ballY + 15 >= paddle1Y && ballY <= paddle1Y + currentPaddleHeight ||
-                ballX >= getWidth() - 45 && ballY + 15 >= paddle2Y && ballY <= paddle2Y + currentPaddleHeight) {
-            ballVelX = -ballVelX;
-            ballTrail.add(new Point(ballX + 7, ballY + 7));
-            if (ballTrail.size() > 50) ballTrail.remove(0);
+
+        //sistemare la fisica della racchetta
+        //
+        //
+// Dentro il metodo o il ciclo di gioco:
+        if ((ballX <= 35 && ballY + 10 >= paddle1Y - 5 && ballY <= paddle1Y + currentPaddleHeight + 5) ||
+        (ballX >= getWidth() - 50 && ballY + 10 >= paddle2Y - 5 && ballY <= paddle2Y + currentPaddleHeight + 5)) {
+
+    // Ottieni il tempo corrente
+                long currentTime = System.currentTimeMillis();
+
+            // Controlla se sono passati almeno 500 ms dall'ultima collisione
+                if (currentTime - lastCollisionTime >= 500) {
+                    ballVelX = -ballVelX; // Inverti la velocità
+                    ballTrail.add(new Point(ballX + 7, ballY + 7)); // Aggiungi al trail
+                
+                // Rimuovi vecchi punti dal trail
+                if (ballTrail.size() > 50) ballTrail.remove(0);
+                
+                // Aggiorna il tempo dell'ultima collisione
+                lastCollisionTime = currentTime;
+            }
         }
 
-        if (ballX <= 0) {
+        //fare punto
+        if (ballX <= 12) {
             scorePlayer2++;
             showScoreMessage();
             resetBall();
-        } else if (ballX >= getWidth()) {
+        } else if (ballX >= getWidth() - 12) {
             scorePlayer1++;
             showScoreMessage();
             resetBall();

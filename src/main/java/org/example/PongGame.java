@@ -90,114 +90,132 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        drawBackground(g);
+        drawBallTrail(g);
+        drawBall(g);
+        drawPaddles(g);
+        drawScoresAndNames(g);
+        drawPowerUp(g);
+        drawMessages(g);
+    }
 
+    private void drawBackground(Graphics g) {
+        g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+    }
+
+    private void drawBallTrail(Graphics g) {
         g.setColor(new Color(255, 255, 255, 50));
         for (Point p : ballTrail) {
             g.fillOval(p.x, p.y, 5, 5);
         }
+    }
+
+    private void drawBall(Graphics g) {
         g.setColor(Color.WHITE);
         g.fillOval(ballX, ballY, 30, 30);
+    }
 
+    private void drawPaddles(Graphics g) {
         g.setColor(Color.CYAN);
         g.fillRect(20, paddle1Y, paddleWidth, currentPaddleHeight);
         g.fillRect(getWidth() - 30, paddle2Y, paddleWidth, currentPaddleHeight);
+    }
 
-        // Impostazioni per il rendering del testo
-        Font nameFont = new Font("Arial", Font.BOLD, 20); // Font per i nomi
-        Font scoreFont = new Font("Arial", Font.BOLD, 40); // Font per i punteggi
+    private void drawScoresAndNames(Graphics g) {
+        Font nameFont = new Font("Arial", Font.BOLD, 20);
+        Font scoreFont = new Font("Arial", Font.BOLD, 40);
         g.setFont(nameFont);
 
-// Calcola le larghezze dei nomi per centrarli con il punteggio
         FontMetrics nameMetrics = g.getFontMetrics(nameFont);
         FontMetrics scoreMetrics = g.getFontMetrics(scoreFont);
 
-// Coordinate del testo del giocatore 1
         int player1NameWidth = nameMetrics.stringWidth(player1Name);
         int player1ScoreWidth = scoreMetrics.stringWidth(String.valueOf(scorePlayer1));
         int player1X = 20;
-        int player1ScoreX = player1X + player1NameWidth + 10; // Spazio tra nome e punteggio
+        int player1ScoreX = player1X + player1NameWidth + 10;
 
-// Coordinate del testo del giocatore 2
         int player2NameWidth = nameMetrics.stringWidth(player2Name);
         int player2ScoreWidth = scoreMetrics.stringWidth(String.valueOf(scorePlayer2));
-        int player2X = getWidth() - player2NameWidth - player2ScoreWidth - 30; // Spazio a destra
+        int player2X = getWidth() - player2NameWidth - player2ScoreWidth - 30;
         int player2ScoreX = player2X + player2NameWidth + 10;
 
-// Disegna i nomi
         g.setColor(Color.WHITE);
         g.drawString(player1Name, player1X, 30);
         g.drawString(player2Name, player2X, 30);
-
-// Disegna i punteggi
         g.setFont(scoreFont);
         g.drawString(String.valueOf(scorePlayer1), player1ScoreX, 35);
         g.drawString(String.valueOf(scorePlayer2), player2ScoreX, 35);
+    }
 
-
-
+    private void drawPowerUp(Graphics g) {
         if (currentPowerUp != null) {
             g.setColor(currentPowerUp.getColor());
             g.fillRect(currentPowerUp.getX(), currentPowerUp.getY(), 50, 50);
         }
+    }
 
-// Messaggio di effetto (come i power-up)
-        if (!effectMessage.isEmpty()) {
-            g.setFont(new Font("Arial", Font.BOLD, 18));
-            FontMetrics metrics = g.getFontMetrics(); // Una singola variabile per il FontMetrics
-            int effectMessageWidth = metrics.stringWidth(effectMessage);
-            int effectX = (getWidth() - effectMessageWidth) / 2;
-            int effectY = getHeight() / 2 - 50; // Posizionato leggermente sopra il centro
-            g.setColor(Color.WHITE);
-            g.drawString(effectMessage, effectX, effectY);
-        }
+    private void drawMessages(Graphics g) {
+        if (!effectMessage.isEmpty()) drawEffectMessage(g);
+        if (!scoreMessage.isEmpty()) drawScoreMessage(g);
+    }
 
-        // Messaggio di "Punto!"
-        if (!scoreMessage.isEmpty()) {
-            g.setFont(new Font("Arial", Font.BOLD, 48));
-            FontMetrics metrics = g.getFontMetrics(); // Riutilizza la stessa variabile FontMetrics
-            int scoreMessageWidth = metrics.stringWidth(scoreMessage);
-            int scoreX = (getWidth() - scoreMessageWidth) / 2;
-            int scoreY = getHeight() / 2; // Centrato esattamente
-            g.setColor(Color.RED);
-            g.drawString(scoreMessage, scoreX, scoreY);
-        }
+    private void drawEffectMessage(Graphics g) {
+        g.setFont(new Font("Arial", Font.BOLD, 18));
+        FontMetrics metrics = g.getFontMetrics();
+        int effectMessageWidth = metrics.stringWidth(effectMessage);
+        int effectX = (getWidth() - effectMessageWidth) / 2;
+        int effectY = getHeight() / 2 - 50;
+        g.setColor(Color.WHITE);
+        g.drawString(effectMessage, effectX, effectY);
+    }
+
+    private void drawScoreMessage(Graphics g) {
+        g.setFont(new Font("Arial", Font.BOLD, 48));
+        FontMetrics metrics = g.getFontMetrics();
+        int scoreMessageWidth = metrics.stringWidth(scoreMessage);
+        int scoreX = (getWidth() - scoreMessageWidth) / 2;
+        int scoreY = getHeight() / 2;
+        g.setColor(Color.RED);
+        g.drawString(scoreMessage, scoreX, scoreY);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        updateGameLogic();
+        repaint();
+    }
 
-        //scia
+    private void updateGameLogic() {
+        updateBallTrail();
+        updateBallPosition();
+        checkCollisions();
+        checkForPowerUp();
+        updateMessages();
+    }
+
+    private void updateBallTrail() {
         ballTrail.add(new Point(ballX + 7, ballY + 7));
         if (ballTrail.size() > 50) ballTrail.remove(0);
+    }
 
+    private void updateBallPosition() {
         ballX += ballVelX;
         ballY += ballVelY;
 
-        //bordi orizzontali
         if (ballY <= 0 || ballY >= getHeight() - 15) ballVelY = -ballVelY;
+    }
 
+    private void checkCollisions() {
+        if (checkPaddleCollision()) ballVelX = -ballVelX;
+        checkScore();
+    }
 
-        if ((ballX <= 35 && ballY + 10 >= paddle1Y - 5 && ballY <= paddle1Y + currentPaddleHeight + 5) ||
-        (ballX >= getWidth() - 50 && ballY + 10 >= paddle2Y - 5 && ballY <= paddle2Y + currentPaddleHeight + 5)) {
+    private boolean checkPaddleCollision() {
+        return (ballX <= 35 && ballY + 10 >= paddle1Y - 5 && ballY <= paddle1Y + currentPaddleHeight + 5) ||
+                (ballX >= getWidth() - 50 && ballY + 10 >= paddle2Y - 5 && ballY <= paddle2Y + currentPaddleHeight + 5);
+    }
 
-    // Ottieni il tempo corrente
-                long currentTime = System.currentTimeMillis();
-
-            // Controlla se sono passati almeno 500 ms dall'ultima collisione
-                if (currentTime - lastCollisionTime >= 500) {
-                    ballVelX = -ballVelX; // Inverti la velocità
-                    ballTrail.add(new Point(ballX + 7, ballY + 7)); // Aggiungi al trail
-                
-                // Rimuovi vecchi punti dalla coda
-                if (ballTrail.size() > 50) ballTrail.remove(0);
-                
-                // Aggiorna il tempo dell'ultima collisione
-                lastCollisionTime = currentTime;
-            }
-        }
-
-        //fare punto
+    private void checkScore() {
         if (ballX <= 12) {
             scorePlayer2++;
             showScoreMessage();
@@ -207,10 +225,10 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
             showScoreMessage();
             resetBall();
         }
+    }
 
-
+    private void checkForPowerUp() {
         if (currentPowerUp == null && Math.random() < 0.01) generatePowerUp();
-
 
         if (currentPowerUp != null &&
                 ballX + 15 >= currentPowerUp.getX() && ballX <= currentPowerUp.getX() + 50 &&
@@ -219,37 +237,25 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
             currentPowerUp = null;
         }
 
-
         if (powerUpDuration > 0) {
             powerUpDuration--;
             if (powerUpDuration == 0) deactivatePowerUp();
         }
-
+    }
+    private void updateMessages() {
         if (effectMessageDuration > 0) {
             effectMessageDuration--;
-            if (effectMessageDuration == 0) effectMessage = "";
+            if (effectMessageDuration == 0) {
+                effectMessage = "";
+            }
         }
 
-        // Controllo se un giocatore segna un punto
-        if (ballX <= 0) {
-            scorePlayer2++;
-            scoreMessage = "Punto!";
-            scoreMessageDuration = 100; // Mostra il messaggio per un tempo breve
-            resetBall();
-        } else if (ballX >= getWidth()) {
-            scorePlayer1++;
-            scoreMessage = "Punto!";
-            scoreMessageDuration = 100; // Mostra il messaggio per un tempo breve
-            resetBall();
-        }
-
-        // Aggiorna durata messaggi
         if (scoreMessageDuration > 0) {
             scoreMessageDuration--;
-            if (scoreMessageDuration == 0) scoreMessage = "";
+            if (scoreMessageDuration == 0) {
+                scoreMessage = "";
+            }
         }
-
-        repaint();
     }
 
     private void resetBall() {
@@ -382,7 +388,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         JLabel titleLabel = new JLabel("PONG");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 48));
         titleLabel.setForeground(Color.WHITE);
-        
+
         //titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Crea i JTextField per i nomi dei giocatori
@@ -396,7 +402,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
 
         StyledButton exitButton = new StyledButton("Esci");
 
-        
+
 
         JLabel player1Label = new JLabel("Giocatore 1:");
         player1Label.setFont(new Font("Arial", Font.ITALIC, 20));

@@ -35,6 +35,7 @@ class PongGameTest {
     void testScoreIncrementOnBallOutOfBounds() {
         int initialScorePlayer1 = pongGame.scorePlayer1;
         int initialScorePlayer2 = pongGame.scorePlayer2;
+        pongGame.actionPerformed(null);
 
         // Simula pallina che esce dal lato sinistro
         pongGame.ballX = -10;

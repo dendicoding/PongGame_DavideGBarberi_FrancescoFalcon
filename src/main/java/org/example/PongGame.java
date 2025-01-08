@@ -22,6 +22,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
@@ -41,26 +42,25 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     public int ballX = getWidth()/2, ballY = getHeight()/2;
     public int ballVelX, ballVelY;
     public int paddle1Y = 200, paddle2Y = 200;
-    private final int paddleWidth = 15, paddleHeight = 130;
-    private final Timer timer;
+    private final int paddleHeight = 130;
 
 
     private long lastCollisionTime = 0;
 
-
+    private boolean ballResetTriggered = false;
     public int scorePlayer1 = 0;
     public int scorePlayer2 = 0;
-    private String difficulty;
+    private final String difficulty;
     public PowerUp currentPowerUp = null;
     private int powerUpDuration = 0;
     public int currentPaddleHeight = paddleHeight;
     public String effectMessage = "";
     private int effectMessageDuration = 0;
-    private List<Point> ballTrail = new ArrayList<>();
-    private Image backgroundImage;
+    private final List<Point> ballTrail = new ArrayList<>();
+    private final Image backgroundImage;
 
-    private String player1Name;
-    private String player2Name;
+    private final String player1Name;
+    private final String player2Name;
 
     private String scoreMessage = "";
     private int scoreMessageDuration = 0;
@@ -74,8 +74,8 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         resetBall(); // Inizializza la posizione e velocità della pallina
         setBallSpeedBasedOnDifficulty(difficulty); // Imposta la velocità in base alla difficoltà
 
-        backgroundImage = new ImageIcon(getClass().getResource("/bg.png")).getImage();
-        timer = new Timer(5, this);
+        backgroundImage = new ImageIcon(Objects.requireNonNull(getClass().getResource("/bg.png"))).getImage();
+        Timer timer = new Timer(5, this);
         timer.start();
     }
 
@@ -117,6 +117,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
 
     private void drawPaddles(Graphics g) {
         g.setColor(Color.CYAN);
+        int paddleWidth = 15;
         g.fillRect(20, paddle1Y, paddleWidth, currentPaddleHeight);
         g.fillRect(getWidth() - 30, paddle2Y, paddleWidth, currentPaddleHeight);
     }
@@ -181,6 +182,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        FirstBallReset();
         updateGameLogic();
         repaint();
     }
@@ -195,7 +197,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
 
     private void updateBallTrail() {
         ballTrail.add(new Point(ballX + 7, ballY + 7));
-        if (ballTrail.size() > 50) ballTrail.remove(0);
+        if (ballTrail.size() > 50) ballTrail.removeFirst();
     }
 
     private void updateBallPosition() {
@@ -211,16 +213,25 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     }
 
     private boolean checkPaddleCollision() {
-        return (ballX <= 35 && ballY + 10 >= paddle1Y - 5 && ballY <= paddle1Y + currentPaddleHeight + 5) ||
-                (ballX >= getWidth() - 50 && ballY + 10 >= paddle2Y - 5 && ballY <= paddle2Y + currentPaddleHeight + 5);
+        long currentTime = System.currentTimeMillis();
+        // Controlla se sono passati almeno 500ms dall'ultima collisione
+        if (currentTime - lastCollisionTime >= 500) {
+            boolean collisionDetected = (ballX <= 35 && ballY + 10 >= paddle1Y - 5 && ballY <= paddle1Y + currentPaddleHeight + 5) ||
+                    (ballX >= getWidth() - 50 && ballY + 10 >= paddle2Y - 5 && ballY <= paddle2Y + currentPaddleHeight + 5);
+            if (collisionDetected) {
+                lastCollisionTime = currentTime;
+                return true;
+            }
+        }
+        return false; // Nessuna collisione rilevata o intervallo di blocco non ancora trascorso
     }
 
     private void checkScore() {
-        if (ballX <= 12) {
+        if (ballX <= 10) {
             scorePlayer2++;
             showScoreMessage();
             resetBall();
-        } else if (ballX >= getWidth() - 12) {
+        } else if (ballX >= getWidth() - 10) {
             scorePlayer1++;
             showScoreMessage();
             resetBall();
@@ -263,6 +274,14 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         ballY = getHeight() / 2;
         ballVelX = -ballVelX;
     }
+
+    private void FirstBallReset(){
+        if (!ballResetTriggered) {
+            ballResetTriggered = true;
+            resetBall();
+        }
+    }
+
     private void showScoreMessage() {
         scoreMessage = "Punto!";
         scoreMessageDuration = 100; // Durata del messaggio
@@ -293,12 +312,12 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     }
 
     private void deactivatePowerUp() {
-        int speed = 0;
-        switch (difficulty) {
-            case "Facile": speed = 4; break;
-            case "Media": speed = 6; break;
-            case "Difficile": speed = 8; break;
-        }
+        int speed = switch (difficulty) {
+            case "Facile" -> 4;
+            case "Media" -> 6;
+            case "Difficile" -> 8;
+            default -> 0;
+        };
         ballVelX = ballVelX < 0 ? -speed : speed; // Mantiene la direzione originale
         ballVelY = ballVelY < 0 ? -speed : speed; // Mantiene la direzione originale
         currentPaddleHeight = paddleHeight; // Reimposta l'altezza della racchetta
@@ -320,7 +339,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
 
     public static void main(String[] args) {
         class StyledButton extends JButton {
-            private Color hoverColor = new Color(60, 179, 113);
+            private final Color hoverColor = new Color(60, 179, 113);
             private boolean isHovered = false;
 
             public StyledButton(String text) {
@@ -476,13 +495,10 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
                         }
                     }
                 });
-
                 gd.setFullScreenWindow(gameFrame);
                 menuFrame.dispose();
             }
         });
-
-
 
         exitButton.addActionListener(e -> System.exit(0));
 
@@ -492,6 +508,12 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         menuFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         menuFrame.setVisible(true);
     }
+
+
+
+
+
+    //perchè è stata creata questa classe?
 
     class PowerUp {
         private int x, y;

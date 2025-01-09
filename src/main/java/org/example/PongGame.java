@@ -1,5 +1,7 @@
 package org.example;
-
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -19,7 +21,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -131,7 +132,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         FontMetrics scoreMetrics = g.getFontMetrics(scoreFont);
 
         int player1NameWidth = nameMetrics.stringWidth(player1Name);
-        int player1ScoreWidth = scoreMetrics.stringWidth(String.valueOf(scorePlayer1));
+        //int player1ScoreWidth = scoreMetrics.stringWidth(String.valueOf(scorePlayer1));
         int player1X = 20;
         int player1ScoreX = player1X + player1NameWidth + 10;
 
@@ -299,8 +300,8 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     public void activatePowerUp() {
         if (currentPowerUp != null) {
             if (currentPowerUp.getType().equals("Velocità")) {
-                ballVelX *= 1.5;
-                ballVelY *= 1.5;
+                ballVelX *= 2;
+                ballVelY *= 2;
                 effectMessage = "Velocità 2x! Durata: 5 secondi";
             } else if (currentPowerUp.getType().equals("Racchetta")) {
                 currentPaddleHeight = 180;
@@ -336,188 +337,191 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     public void keyReleased(KeyEvent e) {}
     @Override
     public void keyTyped(KeyEvent e) {}
-
+    
     public static void main(String[] args) {
-        class StyledButton extends JButton {
-            private final Color hoverColor = new Color(60, 179, 113);
-            private boolean isHovered = false;
+        JFrame menuFrame = createMenuFrame();
+        menuFrame.setVisible(true);
+    }
 
-            public StyledButton(String text) {
-                super(text);
-                setContentAreaFilled(false);
-                setFocusPainted(false);
-                setBorderPainted(false);
-                setForeground(Color.WHITE);
-                setFont(new Font("Arial", Font.BOLD, 20));
-                setPreferredSize(new Dimension(200, 50));
-
-                addMouseListener(new MouseAdapter() {
-                    public void mouseEntered(MouseEvent e) {
-                        isHovered = true;
-                        repaint();
-                    }
-                    public void mouseExited(MouseEvent e) {
-                        isHovered = false;
-                        repaint();
-                    }
-                });
-            }
-
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                if (isHovered) {
-                    g2.setColor(hoverColor);
-                } else {
-                    g2.setColor(new Color(31, 118, 175));
-                }
-
-                RoundRectangle2D.Float rect = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 15, 15);
-                g2.fill(rect);
-
-                super.paintComponent(g);
-                g2.dispose();
-            }
-        }
-
+    private static JFrame createMenuFrame() {
         JFrame menuFrame = new JFrame("Pong Game Menu");
         menuFrame.setUndecorated(true);
+        JPanel menuPanel = createMenuPanel();
+        menuFrame.add(menuPanel);
+        menuFrame.setSize(400, 500);
+        menuFrame.setLocationRelativeTo(null);
+        menuFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        return menuFrame;
+    }
 
+    private static JPanel createMenuPanel() {
         JPanel menuPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
-
                 GradientPaint gradient = new GradientPaint(
                         0, 0, new Color(44, 62, 80),
                         0, getHeight(), new Color(52, 152, 219)
                 );
-
                 g2d.setPaint(gradient);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
             }
         };
 
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
+        menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50)); // Margini uniformi
+        menuPanel.setAlignmentX(Component.CENTER_ALIGNMENT); // Centrare i contenuti
 
+        // Creazione dei componenti
+        JLabel titleLabel = createTitleLabel();
+        JTextField player1NameField = createTextField("Davide Barberi");
+        JTextField player2NameField = createTextField("Francesco Falcon");
+        StyledButton playButton = new StyledButton("Gioca");
+        StyledButton exitButton = new StyledButton("Esci");
+        JLabel player1Label = createPlayerLabel("Giocatore 1:");
+        JLabel player2Label = createPlayerLabel("Giocatore 2:");
+
+        // Centrare i componenti all'interno del menu
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        player1Label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        player1NameField.setAlignmentX(Component.CENTER_ALIGNMENT);
+        player2Label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        player2NameField.setAlignmentX(Component.CENTER_ALIGNMENT);
+        playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Aggiungere spazi per simmetria e distanziamento
+        menuPanel.add(Box.createVerticalGlue());
+        menuPanel.add(titleLabel);
+        menuPanel.add(Box.createRigidArea(new Dimension(0, 20))); // Spazio verticale
+        menuPanel.add(player1Label);
+        menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        menuPanel.add(player1NameField);
+        menuPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        menuPanel.add(player2Label);
+        menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        menuPanel.add(player2NameField);
+        menuPanel.add(Box.createRigidArea(new Dimension(0, 30)));
+        menuPanel.add(playButton);
+        menuPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        menuPanel.add(exitButton);
+        menuPanel.add(Box.createVerticalGlue());
+
+        // Eventi dei pulsanti
+        playButton.addActionListener(e -> startGame(player1NameField, player2NameField, menuPanel));
+        exitButton.addActionListener(e -> System.exit(0));
+
+        return menuPanel;
+    }
+
+    private static JLabel createTitleLabel() {
         JLabel titleLabel = new JLabel("PONG");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 48));
         titleLabel.setForeground(Color.WHITE);
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        return titleLabel;
+    }
 
-        //titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    private static JTextField createTextField(String defaultText) {
+        JTextField textField = new JTextField(defaultText);
+        textField.setPreferredSize(new Dimension(200, 30));
+        textField.setMaximumSize(new Dimension(200, 30));
+        return textField;
+    }
 
-        // Crea i JTextField per i nomi dei giocatori
-        JTextField player1NameField = new JTextField("Davide Barberi");
-        JTextField player2NameField = new JTextField("Francesco Falcon");
-
-        player1NameField.setPreferredSize(new Dimension(200, 30));
-        player2NameField.setPreferredSize(new Dimension(200, 30));
-
-        StyledButton playButton = new StyledButton("Gioca");
-
-        StyledButton exitButton = new StyledButton("Esci");
-
-
-
-        JLabel player1Label = new JLabel("Giocatore 1:");
-        player1Label.setFont(new Font("Arial", Font.ITALIC, 20));
-        player1Label.setForeground(new Color(230, 230, 250)); // Colore Lavanda
-
-        JLabel player2Label = new JLabel("Giocatore 2:");
-        player2Label.setFont(new Font("Arial", Font.ITALIC, 20));
-        player2Label.setForeground(new Color(230, 230, 250)); // Colore Lavanda
-
-        menuPanel.add(titleLabel);
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 40)));
-
-        menuPanel.add(player1Label);
-        menuPanel.add(player1NameField);
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 40)));
-
-        menuPanel.add(player2Label);
-        menuPanel.add(player2NameField);
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 30)));
-
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 50)));
-        menuPanel.add(playButton);
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-
-        menuPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        menuPanel.add(exitButton);
-
-        //playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        //exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        playButton.addActionListener(e -> {
-            // Ottieni i nomi dei giocatori dai campi di testo
-            String player1Name = player1NameField.getText();
-            String player2Name = player2NameField.getText();
-
-            String[] difficulties = {"Facile", "Media", "Difficile"};
-
-            UIManager.put("OptionPane.background", new Color(44, 62, 80));
-            UIManager.put("Panel.background", new Color(44, 62, 80));
-            UIManager.put("OptionPane.messageForeground", Color.WHITE);
-
-            String difficulty = (String) JOptionPane.showInputDialog(
-                    null,
-                    "Scegli la difficoltà:",
-                    "Pong Game - Difficoltà",
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,
-                    difficulties,
-                    difficulties[1]
-            );
-
-            if (difficulty != null) {
-                JFrame gameFrame = new JFrame("Pong Game");
-                gameFrame.setUndecorated(true);
-
-                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-                GraphicsDevice gd = ge.getDefaultScreenDevice();
-
-                gameFrame.setResizable(false);
-
-                PongGame game = new PongGame(difficulty, player1Name, player2Name); // Passa i nomi dei giocatori
-                gameFrame.add(game);
-
-                game.addKeyListener(new KeyAdapter() {
-                    @Override
-                    public void keyPressed(KeyEvent e) {
-                        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                            gd.setFullScreenWindow(null);
-                            System.exit(0);
-                        }
-                    }
-                });
-                gd.setFullScreenWindow(gameFrame);
-                menuFrame.dispose();
-            }
-        });
-
-        exitButton.addActionListener(e -> System.exit(0));
-
-        menuFrame.add(menuPanel);
-        menuFrame.setSize(400, 500);
-        menuFrame.setLocationRelativeTo(null);
-        menuFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        menuFrame.setVisible(true);
+    private static JLabel createPlayerLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Arial", Font.ITALIC, 20));
+        label.setForeground(new Color(230, 230, 250));
+        return label;
     }
 
 
+    private static void startGame(JTextField player1Field, JTextField player2Field, JPanel menuPanel) {
+        String player1Name = player1Field.getText();
+        String player2Name = player2Field.getText();
+        String[] difficulties = {"Facile", "Media", "Difficile"};
+        UIManager.put("OptionPane.background", new Color(44, 62, 80));
+        UIManager.put("Panel.background", new Color(44, 62, 80));
+        UIManager.put("OptionPane.messageForeground", Color.WHITE);
+        String difficulty = (String) JOptionPane.showInputDialog(
+                null,
+                "Scegli la difficoltà:",
+                "Pong Game - Difficoltà",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                difficulties,
+                difficulties[1]
+        );
+        if (difficulty != null) {
+            JFrame gameFrame = new JFrame("Pong Game");
+            gameFrame.setUndecorated(true);
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            GraphicsDevice gd = ge.getDefaultScreenDevice();
+            gameFrame.setResizable(false);
+            PongGame game = new PongGame(difficulty, player1Name, player2Name);
+            gameFrame.add(game);
+            game.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                        gd.setFullScreenWindow(null);
+                        System.exit(0);
+                    }
+                }
+            });
+            gd.setFullScreenWindow(gameFrame);
+            SwingUtilities.getWindowAncestor(menuPanel).dispose();
+        }
+    }
 
+    static class StyledButton extends JButton {
+        private final Color hoverColor = new Color(60, 179, 113);
+        private boolean isHovered = false;
+        public StyledButton(String text) {
+            super(text);
+            setContentAreaFilled(false);
+            setFocusPainted(false);
+            setBorderPainted(false);
+            setForeground(Color.WHITE);
+            setFont(new Font("Arial", Font.BOLD, 20));
+            setPreferredSize(new Dimension(200, 50));
+            addMouseListener(new MouseAdapter() {
+                public void mouseEntered(MouseEvent e) {
+                    isHovered = true;
+                    repaint();
+                }
+                public void mouseExited(MouseEvent e) {
+                    isHovered = false;
+                    repaint();
+                }
+            });
+        }
 
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if (isHovered) {
+                g2.setColor(hoverColor);
+            } else {
+                g2.setColor(new Color(31, 118, 175));
+            }
+            RoundRectangle2D.Float rect = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 15, 15);
+            g2.fill(rect);
+            super.paintComponent(g);
+            g2.dispose();
+        }
+        }
+    }
 
     //perchè è stata creata questa classe?
 
     class PowerUp {
-        private int x, y;
-        private String type;
+        private final int x;
+        private final int y;
+        private final String type;
 
         public PowerUp(int x, int y, String type) {
             this.x = x;
@@ -535,4 +539,3 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
             return Color.YELLOW;
         }
     }
-}
